@@ -1,0 +1,35 @@
+name: Build installers
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            installer: deb
+          - os: windows-latest
+            installer: exe
+          - os: macos-14
+            installer: dmg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/gradle-build-action@v3
+      - name: Grant execute permission
+        if: runner.os != 'Windows'
+        run: chmod +x gradlew
+      - name: Build & package
+        env:
+          INSTALLER_TYPE: ${{ matrix.installer }}
+        run: ./gradlew jpackage --no-daemon --installer-type $INSTALLER_TYPE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ImageGrouper-${{ matrix.os }}
+          path: build/jpackage

@@ -1,0 +1,12 @@
+{
+  "lastUsed": "2025-11-21T14:54:42.621442575",
+  "patternConfig": {
+    "groupPattern": "^52[_\\-\\.\\s]+\\d{8}[_\\-\\.\\s]+([\\w\\-]+)[_\\-\\.\\s]+(?:\\w+|\\d+|\\w*)[_\\-\\.\\s]+\\w+[_\\-\\.\\s]+(?i:jpg)$",
+    "overviewPattern": "(?i:.*scene.*)",
+    "rearPattern": "(?i:.*rear.*)",
+    "frontPattern": "(?i:.*front.*)"
+  },
+  "created": "2025-08-13T20:13:40.691510229",
+  "name": "Default",
+  "description": ""
+}
