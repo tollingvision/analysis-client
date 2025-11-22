@@ -157,3 +157,7 @@ temp/
 *.jks
 certificates/
 secrets/
+
+# Release documentation (keep local only)
+RELEASE_NOTES_*.md
+.github/RELEASE_TEMPLATE.md
