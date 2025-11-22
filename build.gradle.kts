@@ -58,6 +58,15 @@ jlink {
 
     jpackage {
         installerName = "AnalysisSample"
+        appVersion = "1.0.0"
+        
+        // Application launcher configuration
+        imageOptions.addAll(
+            listOf(
+                "--name", "AnalysisSample",
+                "--app-version", "1.0.0"
+            )
+        )
 
         // platform-specific installer format
         val os = OperatingSystem.current()
@@ -65,6 +74,35 @@ jlink {
             os.isMacOsX   -> "dmg"
             os.isWindows  -> "exe"
             else          -> "deb"   // Linux
+        }
+        
+        // Windows-specific configuration
+        if (os.isWindows) {
+            installerOptions.addAll(
+                listOf(
+                    "--win-dir-chooser",
+                    "--win-menu",
+                    "--win-shortcut"
+                )
+            )
+        }
+        
+        // macOS-specific configuration
+        if (os.isMacOsX) {
+            installerOptions.addAll(
+                listOf(
+                    "--mac-package-name", "AnalysisSample"
+                )
+            )
+        }
+        
+        // Linux-specific configuration
+        if (os.isLinux) {
+            installerOptions.addAll(
+                listOf(
+                    "--linux-shortcut"
+                )
+            )
         }
     }
 }
