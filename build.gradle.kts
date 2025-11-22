@@ -53,10 +53,14 @@ jlink {
     forceMerge(".*")
     mergedModule { additive = true }
 
-    imageName.set("analysis-sample-runtime")
+    imageName.set("AnalysisSample")
+    launcher {
+        name = "AnalysisSample"
+    }
     options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
 
     jpackage {
+        imageName = "AnalysisSample"
         installerName = "AnalysisSample"
         appVersion = "1.0.0"
 
