@@ -59,14 +59,6 @@ jlink {
     jpackage {
         installerName = "AnalysisSample"
         appVersion = "1.0.0"
-        
-        // Application launcher configuration
-        imageOptions.addAll(
-            listOf(
-                "--name", "AnalysisSample",
-                "--app-version", "1.0.0"
-            )
-        )
 
         // platform-specific installer format
         val os = OperatingSystem.current()
