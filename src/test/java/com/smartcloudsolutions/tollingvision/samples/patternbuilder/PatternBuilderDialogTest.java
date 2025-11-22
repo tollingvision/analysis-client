@@ -58,6 +58,8 @@ class PatternBuilderDialogTest {
 
   @Test
   void testDialogCreation() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     AtomicReference<String> title = new AtomicReference<>();
     AtomicReference<PatternBuilderDialog.PatternBuilderMode> mode = new AtomicReference<>();
@@ -89,6 +91,8 @@ class PatternBuilderDialogTest {
 
   @Test
   void testInitialConfiguration() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     AtomicReference<PatternConfiguration> config = new AtomicReference<>();
 
@@ -107,6 +111,8 @@ class PatternBuilderDialogTest {
 
   @Test
   void testConfigurationCallback() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     AtomicReference<PatternConfiguration> receivedConfig = new AtomicReference<>();
 
@@ -132,6 +138,8 @@ class PatternBuilderDialogTest {
 
   @Test
   void testDialogProperties() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     AtomicReference<Boolean> isModal = new AtomicReference<>();
     AtomicReference<Boolean> isResizable = new AtomicReference<>();
@@ -156,6 +164,8 @@ class PatternBuilderDialogTest {
 
   @Test
   void testShowDialogWithConfiguration() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
 
     Platform.runLater(

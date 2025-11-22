@@ -45,6 +45,8 @@ class PatternPreviewPaneTest {
 
   @Test
   void testInitialState() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     Platform.runLater(
         () -> {
@@ -58,6 +60,8 @@ class PatternPreviewPaneTest {
 
   @Test
   void testUpdatePreviewWithEmptyData() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     Platform.runLater(
         () -> {
@@ -75,6 +79,8 @@ class PatternPreviewPaneTest {
 
   @Test
   void testUpdatePreviewWithValidConfiguration() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     Platform.runLater(
         () -> {
@@ -113,6 +119,8 @@ class PatternPreviewPaneTest {
 
   @Test
   void testClearPreview() throws Exception {
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     CountDownLatch latch = new CountDownLatch(1);
     Platform.runLater(
         () -> {
