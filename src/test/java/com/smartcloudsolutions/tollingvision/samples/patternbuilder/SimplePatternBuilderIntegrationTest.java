@@ -28,8 +28,7 @@ class SimplePatternBuilderIntegrationTest {
     } catch (UnsupportedOperationException e) {
       // Headless environment - skip JavaFX initialization
       org.junit.jupiter.api.Assumptions.assumeFalse(
-          Boolean.getBoolean("java.awt.headless"),
-          "Skipping JavaFX tests in headless environment");
+          Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     }
   }
 
@@ -41,8 +40,9 @@ class SimplePatternBuilderIntegrationTest {
 
     Platform.runLater(
         () -> {
-          patternBuilder = new SimplePatternBuilder(
-              tempDir.toString(), java.util.ResourceBundle.getBundle("messages"));
+          patternBuilder =
+              new SimplePatternBuilder(
+                  tempDir.toString(), java.util.ResourceBundle.getBundle("messages"));
         });
 
     // Wait for JavaFX initialization
@@ -55,16 +55,17 @@ class SimplePatternBuilderIntegrationTest {
 
   private void createSampleFiles() throws IOException {
     // Create sample image files with different patterns
-    List<String> sampleFiles = List.of(
-        "vehicle_001_front.jpg",
-        "vehicle_001_rear.jpg",
-        "vehicle_001_overview.jpg",
-        "vehicle_002_front.jpg",
-        "vehicle_002_rear.jpg",
-        "vehicle_002_overview.jpg",
-        "car_ABC123_f.png",
-        "car_ABC123_r.png",
-        "car_ABC123_ov.png");
+    List<String> sampleFiles =
+        List.of(
+            "vehicle_001_front.jpg",
+            "vehicle_001_rear.jpg",
+            "vehicle_001_overview.jpg",
+            "vehicle_002_front.jpg",
+            "vehicle_002_rear.jpg",
+            "vehicle_002_overview.jpg",
+            "car_ABC123_f.png",
+            "car_ABC123_r.png",
+            "car_ABC123_ov.png");
 
     for (String filename : sampleFiles) {
       Files.createFile(tempDir.resolve(filename));
@@ -92,20 +93,24 @@ class SimplePatternBuilderIntegrationTest {
             assertFalse(patternBuilder.getDetectedTokens().isEmpty());
 
             // Step 2: Select group ID (simulate user selection)
-            FilenameToken groupIdToken = patternBuilder.getDetectedTokens().stream()
-                .filter(
-                    token -> token.getSuggestedType() == TokenType.GROUP_ID
-                        || token.getValue().matches("\\d+|[A-Z0-9]+"))
-                .findFirst()
-                .orElse(patternBuilder.getDetectedTokens().get(1)); // Fallback to second token
+            FilenameToken groupIdToken =
+                patternBuilder.getDetectedTokens().stream()
+                    .filter(
+                        token ->
+                            token.getSuggestedType() == TokenType.GROUP_ID
+                                || token.getValue().matches("\\d+|[A-Z0-9]+"))
+                    .findFirst()
+                    .orElse(patternBuilder.getDetectedTokens().get(1)); // Fallback to second token
 
             patternBuilder.selectedGroupIdProperty().set(groupIdToken.getSuggestedType());
             assertNotNull(patternBuilder.selectedGroupIdProperty().get());
 
             // Step 3: Add role rules
-            RoleRule frontRule = new RoleRule(ImageRole.FRONT, RuleType.CONTAINS, "front", false, 2);
+            RoleRule frontRule =
+                new RoleRule(ImageRole.FRONT, RuleType.CONTAINS, "front", false, 2);
             RoleRule rearRule = new RoleRule(ImageRole.REAR, RuleType.CONTAINS, "rear", false, 3);
-            RoleRule overviewRule = new RoleRule(ImageRole.OVERVIEW, RuleType.CONTAINS, "overview", false, 1);
+            RoleRule overviewRule =
+                new RoleRule(ImageRole.OVERVIEW, RuleType.CONTAINS, "overview", false, 1);
 
             patternBuilder.getRoleRules().addAll(List.of(frontRule, rearRule, overviewRule));
 
@@ -187,12 +192,15 @@ class SimplePatternBuilderIntegrationTest {
             assertFalse(patternBuilder.getDetectedTokens().isEmpty());
 
             // Check for expected token types
-            boolean hasGroupId = patternBuilder.getDetectedTokens().stream()
-                .anyMatch(token -> token.getSuggestedType() == TokenType.GROUP_ID);
-            boolean hasCameraSide = patternBuilder.getDetectedTokens().stream()
-                .anyMatch(token -> token.getSuggestedType() == TokenType.CAMERA_SIDE);
-            boolean hasExtension = patternBuilder.getDetectedTokens().stream()
-                .anyMatch(token -> token.getSuggestedType() == TokenType.EXTENSION);
+            boolean hasGroupId =
+                patternBuilder.getDetectedTokens().stream()
+                    .anyMatch(token -> token.getSuggestedType() == TokenType.GROUP_ID);
+            boolean hasCameraSide =
+                patternBuilder.getDetectedTokens().stream()
+                    .anyMatch(token -> token.getSuggestedType() == TokenType.CAMERA_SIDE);
+            boolean hasExtension =
+                patternBuilder.getDetectedTokens().stream()
+                    .anyMatch(token -> token.getSuggestedType() == TokenType.EXTENSION);
 
             // At least one of these should be detected
             assertTrue(
@@ -226,7 +234,8 @@ class SimplePatternBuilderIntegrationTest {
             patternBuilder.getDetectedTokens().addAll(List.of(token1, token2, token3));
             patternBuilder.selectedGroupIdProperty().set(TokenType.GROUP_ID);
 
-            RoleRule frontRule = new RoleRule(ImageRole.FRONT, RuleType.CONTAINS, "front", false, 2);
+            RoleRule frontRule =
+                new RoleRule(ImageRole.FRONT, RuleType.CONTAINS, "front", false, 2);
             patternBuilder.getRoleRules().add(frontRule);
 
             // Generate configuration
