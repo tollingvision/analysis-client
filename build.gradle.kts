@@ -56,6 +56,9 @@ jlink {
     imageName.set("AnalysisSample")
     launcher {
         name = "AnalysisSample"
+        jvmArgs = listOf(
+            "-Djpackage.app-version=1.0.0"
+        )
     }
     options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
 
@@ -63,6 +66,12 @@ jlink {
         imageName = "AnalysisSample"
         installerName = "AnalysisSample"
         appVersion = "1.0.0"
+        skipInstaller = false
+        
+        // Ensure Java options are passed correctly
+        jvmArgs = listOf(
+            "-Djpackage.app-version=1.0.0"
+        )
 
         // platform-specific installer format
         val os = OperatingSystem.current()
@@ -76,9 +85,11 @@ jlink {
         if (os.isWindows) {
             installerOptions.addAll(
                 listOf(
+                    "--type", "exe",
                     "--win-dir-chooser",
                     "--win-menu",
-                    "--win-shortcut"
+                    "--win-shortcut",
+                    "--win-menu-group", "TollingVision"
                 )
             )
         }
