@@ -49,8 +49,31 @@ TollingVision Analysis Client processes batches of vehicle images by automatical
 ## Quick Start
 
 ### Prerequisites
-- Java 21 LTS or later
-- Gradle 8.5+ (or use included wrapper)
+- **Java 21 LTS or later**
+  - For development and running: OpenJDK 21 JRE is sufficient
+  - For building native installers (jlink/jpackage): Full JDK with jmods required
+- **Gradle 8.5+** (or use included wrapper)
+
+#### Installing Full JDK for Native Installers
+
+**Ubuntu/Debian:**
+```bash
+# Install full JDK with jmods (required for jlink/jpackage)
+sudo apt-get update
+sudo apt-get install openjdk-21-jdk
+
+# Verify jmods are available
+ls /usr/lib/jvm/java-21-openjdk-amd64/jmods/
+```
+
+**macOS (via Homebrew):**
+```bash
+brew install openjdk@21
+```
+
+**Windows:**
+- Download and install [Eclipse Temurin JDK 21](https://adoptium.net/) or [Oracle JDK 21](https://www.oracle.com/java/technologies/downloads/#java21)
+- Ensure `JAVA_HOME` points to the JDK installation
 
 ### Build and Run
 ```bash
@@ -64,13 +87,36 @@ TollingVision Analysis Client processes batches of vehicle images by automatical
 ./gradlew clean
 ```
 
-### Packaging
-```bash
-# Create runtime image with jlink
-./gradlew jlink
+### Native Installer Packaging
+Create platform-specific installers with custom JRE (requires full JDK with jmods):
 
-# Create platform-specific installer
+```bash
+# Step 1: Create optimized runtime image with jlink
+./gradlew jlink
+# Output: build/analysis-sample-runtime/
+
+# Step 2: Create native installer with jpackage
 ./gradlew jpackage
+# Output (Linux): build/jpackage/AnalysisSample_*.deb
+# Output (Windows): build/jpackage/AnalysisSample-*.exe
+# Output (macOS): build/jpackage/AnalysisSample-*.dmg
+```
+
+**Requirements:**
+- Full JDK installation with `jmods` directory (not JRE)
+- Platform-specific packaging tools:
+  - **Linux**: `dpkg-deb` (usually pre-installed on Debian/Ubuntu)
+  - **Windows**: [WiX Toolset](https://wixtoolset.org/) for MSI or native tools for EXE
+  - **macOS**: Xcode command line tools
+
+**Troubleshooting:**
+If you get "java.base module not found" error, verify your JDK installation:
+```bash
+# Check Java home
+java -XshowSettings:properties -version 2>&1 | grep "java.home"
+
+# Verify jmods exist
+ls $JAVA_HOME/jmods/java.base.jmod
 ```
 
 ## Project Structure

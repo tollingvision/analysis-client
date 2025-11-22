@@ -1,35 +1,100 @@
-name: Build installers
+name: Build Multi-Platform Installers
+
 on:
   push:
-    tags: ['v*.*.*']
+    tags: ["v*.*.*"]
   workflow_dispatch:
+
 jobs:
   build:
+    name: Build ${{ matrix.os }} installer
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
+            platform: linux
             installer: deb
+            artifact: "*.deb"
           - os: windows-latest
+            platform: windows
             installer: exe
+            artifact: "*.exe"
           - os: macos-14
+            platform: macos
             installer: dmg
+            artifact: "*.dmg"
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-      - uses: gradle/gradle-build-action@v3
-      - name: Grant execute permission
+          java-version: "21"
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+
+      - name: Grant execute permission (Unix)
         if: runner.os != 'Windows'
         run: chmod +x gradlew
-      - name: Build & package
-        env:
-          INSTALLER_TYPE: ${{ matrix.installer }}
-        run: ./gradlew jpackage --no-daemon --installer-type $INSTALLER_TYPE
-      - uses: actions/upload-artifact@v4
+
+      - name: Build project
+        run: ./gradlew build --no-daemon
+        shell: bash
+
+      - name: Create native installer
+        run: ./gradlew jpackage --no-daemon
+        shell: bash
+
+      - name: Find installer file
+        id: find-installer
+        run: |
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            INSTALLER=$(find build/jpackage -name "${{ matrix.artifact }}" | head -n 1)
+          else
+            INSTALLER=$(find build/jpackage -name "${{ matrix.artifact }}" | head -n 1)
+          fi
+          echo "installer-path=$INSTALLER" >> $GITHUB_OUTPUT
+          echo "installer-name=$(basename $INSTALLER)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: ImageGrouper-${{ matrix.os }}
-          path: build/jpackage
+          name: TollingVision-Analysis-Client-${{ matrix.platform }}
+          path: ${{ steps.find-installer.outputs.installer-path }}
+          if-no-files-found: error
+          retention-days: 90
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: installers
+
+      - name: Display structure
+        run: ls -R installers
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installers/**/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

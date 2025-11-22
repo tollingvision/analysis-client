@@ -41,6 +41,7 @@ tasks.test {
 
 application {
     mainClass.set("com.smartcloudsolutions.tollingvision.samples.AnalysisSampleApp")
+    mainModule.set("analysis.sample")
 }
 
 javafx {
