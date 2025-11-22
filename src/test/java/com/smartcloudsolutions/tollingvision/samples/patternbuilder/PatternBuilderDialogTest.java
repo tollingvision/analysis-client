@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Test class for PatternBuilderDialog functionality. Tests dialog creation, mode switching, and
+ * Test class for PatternBuilderDialog functionality. Tests dialog creation,
+ * mode switching, and
  * configuration handling.
  */
 class PatternBuilderDialogTest {
 
-  @TempDir Path tempDir;
+  @TempDir
+  Path tempDir;
 
   private PatternBuilderDialog dialog;
 
@@ -26,9 +28,15 @@ class PatternBuilderDialogTest {
   static void initToolkit() {
     // Initialize JavaFX toolkit if not already initialized
     try {
-      Platform.startup(() -> {});
+      Platform.startup(() -> {
+      });
     } catch (IllegalStateException e) {
       // Toolkit already initialized, which is fine
+    } catch (UnsupportedOperationException e) {
+      // Headless environment - skip JavaFX initialization
+      org.junit.jupiter.api.Assumptions.assumeFalse(
+          Boolean.getBoolean("java.awt.headless"),
+          "Skipping JavaFX tests in headless environment");
     }
   }
 
@@ -39,11 +47,10 @@ class PatternBuilderDialogTest {
         () -> {
           // Use isolated PresetManager with temp directory for testing
           PresetManager testPresetManager = new PresetManager(tempDir);
-          dialog =
-              new PatternBuilderDialog(
-                  "/test/folder",
-                  java.util.ResourceBundle.getBundle("messages"),
-                  testPresetManager);
+          dialog = new PatternBuilderDialog(
+              "/test/folder",
+              java.util.ResourceBundle.getBundle("messages"),
+              testPresetManager);
           latch.countDown();
         });
     assertTrue(latch.await(5, TimeUnit.SECONDS), "Dialog creation timed out");
@@ -70,8 +77,7 @@ class PatternBuilderDialogTest {
   @Test
   void testModeEnumValues() {
     PatternBuilderDialog.PatternBuilderMode simple = PatternBuilderDialog.PatternBuilderMode.SIMPLE;
-    PatternBuilderDialog.PatternBuilderMode advanced =
-        PatternBuilderDialog.PatternBuilderMode.ADVANCED;
+    PatternBuilderDialog.PatternBuilderMode advanced = PatternBuilderDialog.PatternBuilderMode.ADVANCED;
 
     assertEquals("Simple", simple.getDisplayName());
     assertEquals("Visual pattern builder for non-regex users", simple.getDescription());

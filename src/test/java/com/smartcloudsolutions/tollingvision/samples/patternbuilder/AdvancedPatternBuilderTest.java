@@ -20,9 +20,15 @@ class AdvancedPatternBuilderTest {
   static void initToolkit() {
     // Initialize JavaFX toolkit
     try {
-      Platform.startup(() -> {});
+      Platform.startup(() -> {
+      });
     } catch (IllegalStateException e) {
       // Platform already initialized
+    } catch (UnsupportedOperationException e) {
+      // Headless environment - skip JavaFX initialization
+      org.junit.jupiter.api.Assumptions.assumeFalse(
+          Boolean.getBoolean("java.awt.headless"),
+          "Skipping JavaFX tests in headless environment");
     }
   }
 
@@ -33,9 +39,8 @@ class AdvancedPatternBuilderTest {
     Platform.runLater(
         () -> {
           // Create new builder for each test
-          advancedBuilder =
-              new AdvancedPatternBuilder(
-                  "/test/folder", java.util.ResourceBundle.getBundle("messages"));
+          advancedBuilder = new AdvancedPatternBuilder(
+              "/test/folder", java.util.ResourceBundle.getBundle("messages"));
           latch.countDown();
         });
     latch.await(5, TimeUnit.SECONDS);
@@ -141,10 +146,9 @@ class AdvancedPatternBuilderTest {
                 assertTrue(result.hasErrors(), "Invalid patterns should have errors");
 
                 // Check for specific error type
-                boolean hasCapturingGroupError =
-                    result.getErrors().stream()
-                        .anyMatch(
-                            error -> error.getType() == ValidationErrorType.NO_CAPTURING_GROUPS);
+                boolean hasCapturingGroupError = result.getErrors().stream()
+                    .anyMatch(
+                        error -> error.getType() == ValidationErrorType.NO_CAPTURING_GROUPS);
                 assertTrue(hasCapturingGroupError, "Should have capturing group error");
 
                 latch.countDown();
@@ -173,10 +177,9 @@ class AdvancedPatternBuilderTest {
                 assertTrue(result.hasErrors(), "Patterns with syntax errors should have errors");
 
                 // Check for regex syntax error
-                boolean hasSyntaxError =
-                    result.getErrors().stream()
-                        .anyMatch(
-                            error -> error.getType() == ValidationErrorType.REGEX_SYNTAX_ERROR);
+                boolean hasSyntaxError = result.getErrors().stream()
+                    .anyMatch(
+                        error -> error.getType() == ValidationErrorType.REGEX_SYNTAX_ERROR);
                 assertTrue(hasSyntaxError, "Should have regex syntax error");
 
                 latch.countDown();
@@ -191,13 +194,12 @@ class AdvancedPatternBuilderTest {
     Platform.runLater(
         () -> {
           // Set sample filenames
-          List<String> sampleFilenames =
-              Arrays.asList(
-                  "vehicle_001_front.jpg",
-                  "vehicle_001_rear.jpg",
-                  "vehicle_001_overview.jpg",
-                  "vehicle_002_front.jpg",
-                  "vehicle_002_rear.jpg");
+          List<String> sampleFilenames = Arrays.asList(
+              "vehicle_001_front.jpg",
+              "vehicle_001_rear.jpg",
+              "vehicle_001_overview.jpg",
+              "vehicle_002_front.jpg",
+              "vehicle_002_rear.jpg");
 
           advancedBuilder.setSampleFilenames(sampleFilenames);
 
@@ -284,11 +286,9 @@ class AdvancedPatternBuilderTest {
                 assertFalse(result.isValid(), "Multiple capturing groups should fail validation");
 
                 // Check for specific error type
-                boolean hasMultipleGroupsError =
-                    result.getErrors().stream()
-                        .anyMatch(
-                            error ->
-                                error.getType() == ValidationErrorType.MULTIPLE_CAPTURING_GROUPS);
+                boolean hasMultipleGroupsError = result.getErrors().stream()
+                    .anyMatch(
+                        error -> error.getType() == ValidationErrorType.MULTIPLE_CAPTURING_GROUPS);
                 assertTrue(hasMultipleGroupsError, "Should have multiple capturing groups error");
 
                 latch.countDown();

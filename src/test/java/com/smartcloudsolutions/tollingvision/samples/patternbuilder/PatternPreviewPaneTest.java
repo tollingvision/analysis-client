@@ -20,7 +20,14 @@ class PatternPreviewPaneTest {
   @BeforeAll
   static void initJavaFX() {
     // Initialize JavaFX toolkit
-    new JFXPanel();
+    try {
+      new JFXPanel();
+    } catch (UnsupportedOperationException e) {
+      // Headless environment - skip JavaFX initialization
+      org.junit.jupiter.api.Assumptions.assumeFalse(
+          Boolean.getBoolean("java.awt.headless"),
+          "Skipping JavaFX tests in headless environment");
+    }
   }
 
   @BeforeEach
@@ -78,12 +85,11 @@ class PatternPreviewPaneTest {
           config.addRoleRule(frontRule);
           config.addRoleRule(rearRule);
 
-          List<String> filenames =
-              Arrays.asList(
-                  "vehicle_001_front.jpg",
-                  "vehicle_001_rear.jpg",
-                  "vehicle_002_front.jpg",
-                  "vehicle_002_rear.jpg");
+          List<String> filenames = Arrays.asList(
+              "vehicle_001_front.jpg",
+              "vehicle_001_rear.jpg",
+              "vehicle_002_front.jpg",
+              "vehicle_002_rear.jpg");
 
           previewPane.updatePreview(config, filenames);
 

@@ -17,16 +17,22 @@ class SimplePatternBuilderTest {
   @BeforeAll
   static void initJavaFX() {
     // Initialize JavaFX toolkit
-    new JFXPanel();
+    try {
+      new JFXPanel();
+    } catch (UnsupportedOperationException e) {
+      // Headless environment - skip JavaFX initialization
+      org.junit.jupiter.api.Assumptions.assumeFalse(
+          Boolean.getBoolean("java.awt.headless"),
+          "Skipping JavaFX tests in headless environment");
+    }
   }
 
   @BeforeEach
   void setUp() {
     Platform.runLater(
         () -> {
-          patternBuilder =
-              new SimplePatternBuilder(
-                  "/test/folder", java.util.ResourceBundle.getBundle("messages"));
+          patternBuilder = new SimplePatternBuilder(
+              "/test/folder", java.util.ResourceBundle.getBundle("messages"));
         });
 
     // Wait for JavaFX initialization
@@ -108,8 +114,8 @@ class SimplePatternBuilderTest {
         () -> {
           // Use reflection to access private method for testing
           try {
-            java.lang.reflect.Method isImageFileMethod =
-                SimplePatternBuilder.class.getDeclaredMethod("isImageFile", String.class);
+            java.lang.reflect.Method isImageFileMethod = SimplePatternBuilder.class.getDeclaredMethod("isImageFile",
+                String.class);
             isImageFileMethod.setAccessible(true);
 
             assertTrue((Boolean) isImageFileMethod.invoke(patternBuilder, "test.jpg"));
