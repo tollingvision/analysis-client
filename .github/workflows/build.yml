@@ -46,6 +46,9 @@ jobs:
 
       - name: Build project
         run: ./gradlew build --no-daemon
+        env:
+          # Enable headless mode for JavaFX tests on Linux
+          JAVA_TOOL_OPTIONS: -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dprism.text=t2k
         shell: bash
 
       - name: Create native installer
