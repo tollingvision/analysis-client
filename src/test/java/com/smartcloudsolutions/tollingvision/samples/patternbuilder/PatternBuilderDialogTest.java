@@ -24,15 +24,14 @@ class PatternBuilderDialogTest {
 
   @BeforeAll
   static void initToolkit() {
+    // Skip in headless environment BEFORE trying to initialize JavaFX
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     // Initialize JavaFX toolkit if not already initialized
     try {
       Platform.startup(() -> {});
     } catch (IllegalStateException e) {
       // Toolkit already initialized, which is fine
-    } catch (UnsupportedOperationException e) {
-      // Headless environment - skip JavaFX initialization
-      org.junit.jupiter.api.Assumptions.assumeFalse(
-          Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     }
   }
 

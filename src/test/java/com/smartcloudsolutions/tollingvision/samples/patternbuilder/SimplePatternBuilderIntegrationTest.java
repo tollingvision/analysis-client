@@ -22,14 +22,11 @@ class SimplePatternBuilderIntegrationTest {
 
   @BeforeAll
   static void initJavaFX() {
+    // Skip in headless environment BEFORE trying to initialize JavaFX
+    org.junit.jupiter.api.Assumptions.assumeFalse(
+        Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
     // Initialize JavaFX toolkit
-    try {
-      new JFXPanel();
-    } catch (UnsupportedOperationException e) {
-      // Headless environment - skip JavaFX initialization
-      org.junit.jupiter.api.Assumptions.assumeFalse(
-          Boolean.getBoolean("java.awt.headless"), "Skipping JavaFX tests in headless environment");
-    }
+    new JFXPanel();
   }
 
   @BeforeEach
