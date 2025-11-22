@@ -77,7 +77,7 @@ jlink {
         val os = OperatingSystem.current()
         installerType = when {
             os.isMacOsX   -> "dmg"
-            os.isWindows  -> "exe"
+            os.isWindows  -> "msi"  // Try MSI instead of EXE
             else          -> "deb"   // Linux
         }
         
@@ -85,7 +85,6 @@ jlink {
         if (os.isWindows) {
             installerOptions.addAll(
                 listOf(
-                    "--type", "exe",
                     "--win-dir-chooser",
                     "--win-menu",
                     "--win-shortcut",

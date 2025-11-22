@@ -19,8 +19,8 @@ jobs:
             artifact: "*.deb"
           - os: windows-latest
             platform: windows
-            installer: exe
-            artifact: "*.exe"
+            installer: msi
+            artifact: "*.msi"
           - os: macos-14
             platform: macos
             installer: dmg
