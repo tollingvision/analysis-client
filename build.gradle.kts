@@ -52,7 +52,11 @@ javafx {
 
 jlink {
     forceMerge(".*")
-    mergedModule { additive = true }
+    mergedModule { 
+        additive = true
+        uses("io.grpc.NameResolverProvider")
+        uses("io.grpc.LoadBalancerProvider")
+    }
 
     imageName.set("AnalysisSample")
     launcher {
