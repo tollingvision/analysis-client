@@ -141,6 +141,10 @@ public class PatternBuilderDialog extends Stage {
 
     // Load the preset into the active builder
     loadDefaultPreset();
+
+    // Now that dialog is fully initialized, mark the Simple Builder ready so it can
+    // display the UI once analysis completes (or immediately if results are cached)
+    simplePatternBuilder.markDialogReady();
   }
 
   /** Initializes the dialog properties. */
@@ -376,7 +380,8 @@ public class PatternBuilderDialog extends Stage {
 
   /** Sets the current pattern builder mode. */
   private void setMode(PatternBuilderMode mode) {
-    if (mode == currentMode.get()) {
+    boolean needsInitialLayout = contentPane.getCenter() == null;
+    if (mode == currentMode.get() && !needsInitialLayout) {
       return;
     }
 
@@ -422,7 +427,9 @@ public class PatternBuilderDialog extends Stage {
 
     updateValidationStatus();
 
-    ValidationLogger.logUserAction("Mode switched", String.format("%s → %s", oldMode, mode));
+    if (oldMode != mode) {
+      ValidationLogger.logUserAction("Mode switched", String.format("%s → %s", oldMode, mode));
+    }
   }
 
   /** Updates the mode selection UI. */
@@ -793,27 +800,9 @@ public class PatternBuilderDialog extends Stage {
       // from it
       simplePatternBuilder.saveOptionalStateToConfig(builderConfig);
 
-      System.out.println(
-          "DEBUG saveOptionalStateFromSimpleBuilder: builderConfig has "
-              + (builderConfig.getOptionalTokenTypes() != null
-                  ? builderConfig.getOptionalTokenTypes().size()
-                  : 0)
-              + " optional types");
-      System.out.println(
-          "DEBUG saveOptionalStateFromSimpleBuilder: builderConfig has "
-              + (builderConfig.getOptionalCustomTokenNames() != null
-                  ? builderConfig.getOptionalCustomTokenNames().size()
-                  : 0)
-              + " optional custom");
-
       // Store optional state in the configuration for persistence
       config.setOptionalTokenTypes(builderConfig.getOptionalTokenTypes());
       config.setOptionalCustomTokenNames(builderConfig.getOptionalCustomTokenNames());
-
-      System.out.println(
-          "DEBUG saveOptionalStateFromSimpleBuilder: config now has "
-              + (config.getOptionalTokenTypes() != null ? config.getOptionalTokenTypes().size() : 0)
-              + " optional types");
     }
   }
 

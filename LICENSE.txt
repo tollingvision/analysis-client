@@ -1,0 +1,54 @@
+End-User License Agreement (EULA) for Tolling Vision Docker Image
+Version 1.1
+
+Last revised on: 04/16/2025
+
+This End-User License Agreement (“Agreement”) is a legal agreement between you (“Licensee”) and Tolling Vision (“Licensor”) for the Tolling Vision Docker Image (“Software”), available for download at tollingvision.com (the “Site”) and the AWS-operated Docker repository at public.ecr.aws/smartcloud/tollingvision. By downloading, installing, or using the Software, Licensee agrees to be bound by the terms of this Agreement. If Licensee does not agree to these terms, they must not download, install, or use the Software.
+
+1. License Grant
+Licensor grants Licensee a non-exclusive, non-transferable license to download, install, and use the Software in accordance with this Agreement.
+
+2. Installation
+Licensee is responsible for the installation of the Software as per the instructions provided at the How to install Tolling Vision page and the Amazon ECR Public Gallery. Licensor does not charge an installation fee and does not guarantee successful installation. Licensee may request installation assistance via the Contact Us page if needed.
+
+3. Fees and Payment
+Fees for the Software are based on your selected pricing model, as outlined on the Site’s Pricing page:
+- Credit-Based Plans: Licensee prepays a fixed number of credits per month. If the credit quota is exceeded, overage credits are automatically tracked and billed at the applicable rate.
+- Unlimited Plans (Thread-Based): Licensee pays a fixed monthly fee per concurrently running processing thread. Additional threads can be added at any time by paying the prorated difference. Downgrades or cancellations take effect at the end of the current billing cycle.
+- Pay-As-You-Go: Licensee may purchase credits on demand without a recurring subscription.
+All fees are payable in advance, and no refunds are provided except as required by law. The most current pricing, including volume discounts or promotional offers, is published on the Site or available upon request from our sales team.
+
+4. Internet Connection Requirement
+A stable internet connection is required to use the Software. Each image processed requires a small amount of data (a few hundred bytes) to be sent to and received from the license services that operate the ANPR/MMR engines. These services are hosted by AWS across multiple regions and availability zones to ensure high availability.
+
+5. No Warranty
+The Software operates in the Licensee’s environment on Licensee-configured hardware. Licensor provides no warranty regarding the proper functioning of the Software and disclaims all liability for any damages. Licensee is offered a limited free trial period (subject to individual approval) to evaluate the Software. During this trial period, Licensor disclaims all liability for any damages arising from the use of the Software.
+
+6. Third-Party Services
+The license services required for the Software’s operation are hosted by a third party (Amazon Web Services, Inc.). While high availability is a priority, Licensor does not guarantee the availability of these services and disclaims all liability for any damages resulting from their unavailability.
+
+7. Service Availability and Credits
+Licensor commits to the following service level credits if the Software’s availability is impacted due to issues within Licensor’s control:
+- If annual availability is below 95%, Licensee will receive a credit for the entire current month’s fee (or 1/12 of the annual subscription fee).
+- If annual availability is between 95% and 99%, Licensee will receive a credit for 25% of the current month’s fee (or 1/12 of the annual subscription fee).
+- If annual availability is between 99% and 99.95%, Licensee will receive a credit for 10% of the current month’s fee (or 1/12 of the annual subscription fee). These credits will be applied to the next subscription period.
+
+8. Credit Request and Payment Procedures
+To receive service credits, Licensee must submit a claim through the Contact Us page by the end of the second billing cycle after the incident occurred. The claim must include:
+- The words “EULA Credit Request” in the subject.
+- The dates and times of the unavailability incidents.
+- Logs documenting the incidents.
+If the claim is confirmed, credits will be issued within one billing cycle. Failure to provide necessary information will disqualify the claim.
+
+9. Exclusions
+The service commitment does not apply to any unavailability, suspension, or termination caused by factors outside Licensor’s reasonable control, including but not limited to:
+- Force majeure events.
+- Internet access or related issues beyond the demarcation point of the Software.
+- Actions or inactions of the Licensee (e.g., misconfiguration).
+- Licensee’s equipment, software, or other technology.
+- Suspension or termination of Licensee’s right to use the Software per this Agreement.
+
+10. General Provisions
+For additional terms including dispute resolution, modifications, export controls, disclosures, and electronic communication, please refer to Section 8 of the Terms of Use.
+
+By downloading, installing, or using the Software, Licensee acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement. If Licensee does not agree to these terms, they must not download, install, or use the Software.

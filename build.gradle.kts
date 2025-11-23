@@ -15,6 +15,7 @@ dependencies {
 
     implementation("io.grpc:grpc-netty")
     implementation("com.smart-cloud-solutions:tollingvision:2.6.2")
+    implementation("com.google.code.gson:gson:2.12.1")
 
     runtimeOnly("com.google.protobuf:protobuf-java:4.33.0")
     implementation("com.google.protobuf:protobuf-java-util:4.33.0")
@@ -77,38 +78,59 @@ jlink {
         val os = OperatingSystem.current()
         installerType = when {
             os.isMacOsX   -> "dmg"
-            os.isWindows  -> "msi"  // Try MSI instead of EXE
+            os.isWindows  -> "msi"
             else          -> "deb"   // Linux
+        }
+        
+        // Common options for all platforms
+        val licenseFile = file("LICENSE.txt")
+        if (licenseFile.exists()) {
+            installerOptions.add("--license-file")
+            installerOptions.add(licenseFile.absolutePath)
         }
         
         // Windows-specific configuration
         if (os.isWindows) {
-            installerOptions.addAll(
-                listOf(
-                    "--win-dir-chooser",
-                    "--win-menu",
-                    "--win-shortcut",
-                    "--win-menu-group", "TollingVision"
-                )
+            val winOptions = mutableListOf(
+                "--win-dir-chooser",
+                "--win-menu",
+                "--win-shortcut",
+                "--win-menu-group", "TollingVision",
+                // Install to C:\Program Files\TollingVision\AnalysisSample
+                "--install-dir", "TollingVision\\AnalysisSample"
             )
+            
+            // Add splash screen if it exists
+            val splashFile = file("installer-splash.png")
+            if (splashFile.exists()) {
+                winOptions.add("--resource-dir")
+                winOptions.add(projectDir.absolutePath)
+            }
+            
+            installerOptions.addAll(winOptions)
         }
         
         // macOS-specific configuration
         if (os.isMacOsX) {
-            installerOptions.addAll(
-                listOf(
-                    "--mac-package-name", "AnalysisSample"
-                )
+            val macOptions = mutableListOf(
+                "--mac-package-name", "AnalysisSample",
+                // Install to /Applications/TollingVision/
+                "--install-dir", "/Applications/TollingVision"
             )
+            
+            installerOptions.addAll(macOptions)
         }
         
         // Linux-specific configuration
         if (os.isLinux) {
-            installerOptions.addAll(
-                listOf(
-                    "--linux-shortcut"
-                )
+            val linuxOptions = mutableListOf(
+                "--linux-shortcut",
+                "--linux-menu-group", "TollingVision",
+                // Install to /opt/tollingvision/analysissample
+                "--install-dir", "/opt/tollingvision/analysissample"
             )
+            
+            installerOptions.addAll(linuxOptions)
         }
     }
 }

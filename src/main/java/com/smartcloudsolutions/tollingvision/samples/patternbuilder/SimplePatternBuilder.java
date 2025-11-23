@@ -63,6 +63,8 @@ public class SimplePatternBuilder extends VBox {
   private ProgressIndicator analysisProgressIndicator;
   private int currentStep = 0;
   private final int totalSteps = 3; // Token Selection, Group ID, Role Rules (File Analysis removed)
+  private boolean uiInitialized = false; // Track if showStep() has been called
+  private boolean dialogReady = false; // Track when parent dialog finished initializing
 
   // Caching for tokenization/grouping results
   private static final java.util.Map<String, TokenAnalysis> analysisCache =
@@ -81,6 +83,16 @@ public class SimplePatternBuilder extends VBox {
 
   // Configuration ready callback
   private java.util.function.Consumer<PatternConfiguration> onConfigurationReady;
+
+  // Pending preset configuration to be applied after analysis completes
+  private PatternBuilderConfig pendingOptionalConfig;
+
+  // Track if we have a pending configuration that should be preserved during
+  // token preview update
+  private PatternConfiguration pendingConfiguration;
+
+  // Track whether we're using cached analysis (true) or fresh analysis (false)
+  private boolean isUsingCachedAnalysis = false;
 
   /**
    * Creates a new SimplePatternBuilder with guided workflow steps.
@@ -343,6 +355,9 @@ public class SimplePatternBuilder extends VBox {
    * @param step the step number to show (0-based)
    */
   private void showStep(int step) {
+    // Mark UI as initialized on first call
+    uiInitialized = true;
+
     // Update current step and step indicator
     currentStep = step;
     updateStepIndicator();
@@ -488,6 +503,9 @@ public class SimplePatternBuilder extends VBox {
 
     // Log step change
     ValidationLogger.logUserAction("Step changed", "Step " + (step + 1) + " of " + totalSteps);
+    ValidationLogger.logUserAction(
+        "Simple UI state",
+        String.format("Step %d rendered with %d children", step + 1, getChildren().size()));
   }
 
   /** Shows detailed validation information in the final step. */
@@ -574,12 +592,14 @@ public class SimplePatternBuilder extends VBox {
     // Check cache first
     TokenAnalysis cachedResult = analysisCache.get(directoryPath);
     if (cachedResult != null) {
-      // Use cached result
+      // Use cached result - preserve any pending configuration
+      isUsingCachedAnalysis = true;
       applyAnalysisResult(cachedResult);
       return;
     }
 
-    // Perform new analysis
+    // Perform new analysis - this is fresh, not cached
+    isUsingCachedAnalysis = false;
     performFileAnalysis(directoryPath);
   }
 
@@ -660,19 +680,18 @@ public class SimplePatternBuilder extends VBox {
           analysisProgressIndicator.setVisible(false);
           analysisComplete = true; // Mark analysis as complete
 
+          // Only clear pending configuration on FRESH analysis
+          // For cached results, we want to preserve the loaded configuration (tokens,
+          // groupId, roleRules)
+          if (!isUsingCachedAnalysis) {
+            pendingConfiguration = null;
+          }
+
           // Update sample filenames
           sampleFilenames.clear();
           sampleFilenames.addAll(analysis.getFilenames());
 
-          // If this is first load and UI not shown yet, show step 0 now
-          boolean isFirstLoad =
-              getChildren().size() <= 4; // Only header, validation, extension area, nav
-          if (isFirstLoad && currentStep == 0) {
-            // Analysis complete, now safe to show UI
-            showStep(0);
-          }
-
-          // Configure token preview spinner - start with 10 files by default
+          // Configure token preview spinner FIRST - start with 10 files by default
           int fileCount = sampleFilenames.size();
           int maxPreview = Math.min(500, fileCount);
           int defaultPreview = Math.min(10, fileCount); // Default to 10 files
@@ -716,13 +735,31 @@ public class SimplePatternBuilder extends VBox {
             updateValidationModel();
           }
 
-          // Log analysis completion
+          // Log analysis completion and attempt to show UI if dialog is ready
           ValidationLogger.logFileAnalysis(
               analysis.getFilenames().size(),
               analysis.getSuggestions().size(),
               0 // Duration not tracked here
               );
+
+          // Apply any pending optional configuration now that tokens are loaded
+          applyPendingOptionalConfig();
+
+          tryShowInitialStep();
         });
+  }
+
+  /** Marks the parent dialog as ready and shows Step 0 if analysis already completed. */
+  public void markDialogReady() {
+    dialogReady = true;
+    tryShowInitialStep();
+  }
+
+  /** Attempts to show the initial step when both dialog and analysis are ready. */
+  private void tryShowInitialStep() {
+    if (!uiInitialized && dialogReady && analysisComplete) {
+      showStep(0);
+    }
   }
 
   /** Reanalyzes files by clearing cache and performing fresh analysis. */
@@ -773,17 +810,18 @@ public class SimplePatternBuilder extends VBox {
       return;
     }
 
-    // Check if we have existing configuration that should be preserved
-    boolean hadConfiguration =
-        !detectedTokens.isEmpty() && selectedGroupId.get() != null && !roleRules.isEmpty();
+    // Check if we have a pending configuration that should be preserved (loaded via
+    // setConfiguration)
+    boolean hasLoadedConfiguration = pendingConfiguration != null;
 
     // Create a filtered analysis with only the first N files
     List<String> previewFiles =
         sampleFilenames.subList(0, Math.min(fileCount, sampleFilenames.size()));
 
-    // If we had configuration loaded from preset, don't re-analyze - just keep it
-    if (hadConfiguration) {
-      // Don't touch detectedTokens - keep the preset configuration
+    // If we have a loaded configuration from preset or mode switch, preserve it
+    if (hasLoadedConfiguration) {
+      // Don't touch detectedTokens, selectedGroupId, or roleRules - keep the loaded
+      // configuration
       // Update UI components with preserved configuration
       if (groupIdSelector != null && !detectedTokens.isEmpty()) {
         groupIdSelector.setAvailableTokens(detectedTokens);
@@ -791,6 +829,13 @@ public class SimplePatternBuilder extends VBox {
       if (roleRulesPane != null && !roleRules.isEmpty()) {
         roleRulesPane.setRoleRules(roleRules);
       }
+
+      // Create TokenAnalysis from the loaded detectedTokens, not from file analysis
+      TokenAnalysis loadedAnalysis = createTokenAnalysisFromTokens(detectedTokens);
+      tokenSelectionPane.setTokenAnalysis(loadedAnalysis);
+
+      // Clear the pending flag after first update
+      pendingConfiguration = null;
     } else {
       // No previous configuration - perform fresh token extraction
       detectedTokens.clear();
@@ -825,25 +870,25 @@ public class SimplePatternBuilder extends VBox {
       }
       System.out.println(
           "DETECTED TOKENS (" + detectedTokens.size() + " unique): " + detectedTokens);
-    }
 
-    // Update the TokenSelectionPane with filtered analysis
-    // Create a filtered TokenAnalysis for display
-    java.util.Map<String, List<FilenameToken>> filteredTokens = new java.util.HashMap<>();
-    for (String filename : previewFiles) {
-      List<FilenameToken> tokens = analysis.getTokensForFilename(filename);
-      if (tokens != null) {
-        filteredTokens.put(filename, tokens);
+      // Update the TokenSelectionPane with filtered analysis from file analysis
+      // Create a filtered TokenAnalysis for display
+      java.util.Map<String, List<FilenameToken>> filteredTokens = new java.util.HashMap<>();
+      for (String filename : previewFiles) {
+        List<FilenameToken> tokens = analysis.getTokensForFilename(filename);
+        if (tokens != null) {
+          filteredTokens.put(filename, tokens);
+        }
       }
-    }
 
-    TokenAnalysis filteredAnalysis =
-        new TokenAnalysis(
-            previewFiles,
-            filteredTokens,
-            analysis.getSuggestions(),
-            analysis.getConfidenceScores());
-    tokenSelectionPane.setTokenAnalysis(filteredAnalysis);
+      TokenAnalysis filteredAnalysis =
+          new TokenAnalysis(
+              previewFiles,
+              filteredTokens,
+              analysis.getSuggestions(),
+              analysis.getConfidenceScores());
+      tokenSelectionPane.setTokenAnalysis(filteredAnalysis);
+    }
 
     updateNavigationState();
 
@@ -1144,12 +1189,16 @@ public class SimplePatternBuilder extends VBox {
   }
 
   /**
-   * Loads configuration into the builder, restoring tokens, group ID selection, and role rules.
+   * Loads configuration into the builder, restoring tokens, group ID selection, and role rules. The
+   * configuration will be preserved during token preview updates.
    *
    * @param config the configuration to load
    */
   public void setConfiguration(PatternConfiguration config) {
     if (config != null) {
+      // Store the configuration to preserve it during updateTokenPreview
+      pendingConfiguration = config;
+
       // Restore tokens - the tokens will be refreshed when analysis completes
       if (config.getTokens() != null && !config.getTokens().isEmpty()) {
         detectedTokens.setAll(config.getTokens());
@@ -1172,9 +1221,16 @@ public class SimplePatternBuilder extends VBox {
         }
       }
 
-      // Restore role rules
+      // Restore role rules - filter out rules with empty values
       if (config.getRoleRules() != null && !config.getRoleRules().isEmpty()) {
-        roleRules.setAll(config.getRoleRules());
+        // Filter out rules with empty or null values
+        List<RoleRule> validRules =
+            config.getRoleRules().stream()
+                .filter(
+                    rule -> rule.getRuleValue() != null && !rule.getRuleValue().trim().isEmpty())
+                .toList();
+
+        roleRules.setAll(validRules);
 
         // Update RoleRulesPane
         if (roleRulesPane != null) {
@@ -1223,7 +1279,9 @@ public class SimplePatternBuilder extends VBox {
       try {
         java.nio.file.Path directory = java.nio.file.Path.of(directoryPath);
         if (java.nio.file.Files.exists(directory) && java.nio.file.Files.isDirectory(directory)) {
-          analyzeSampleFiles(directory);
+          // Use startFileAnalysis instead of analyzeSampleFiles - it checks cache first
+          // and prevents duplicate analysis
+          startFileAnalysis(directory.toString());
         }
       } catch (Exception e) {
         ValidationLogger.logException(e, "Failed to set analysis directory");
@@ -1440,38 +1498,39 @@ public class SimplePatternBuilder extends VBox {
       List<String> optionalCustomNames =
           new ArrayList<>(tokenSelectionPane.getOptionalCustomTokenNames());
       config.setOptionalCustomTokenNames(optionalCustomNames);
-
-      System.out.println(
-          "DEBUG saveOptionalStateToConfig: optionalTokenTypes size = "
-              + tokenSelectionPane.getOptionalTokenTypes().size());
-      System.out.println(
-          "DEBUG saveOptionalStateToConfig: optionalTokenTypes = "
-              + tokenSelectionPane.getOptionalTokenTypes());
-      System.out.println(
-          "DEBUG saveOptionalStateToConfig: Set identity = "
-              + System.identityHashCode(tokenSelectionPane.getOptionalTokenTypes()));
-      System.out.println(
-          "DEBUG saveOptionalStateToConfig: optionalCustomNames size = "
-              + optionalCustomNames.size());
-      System.out.println(
-          "DEBUG saveOptionalStateToConfig: Config now has "
-              + (config.getOptionalTokenTypes() != null ? config.getOptionalTokenTypes().size() : 0)
-              + " optional types");
     }
   }
 
   /**
-   * Loads the optional token state from the given PatternBuilderConfig.
+   * Loads the optional token state from the given PatternBuilderConfig. The configuration is stored
+   * and will be applied after file analysis completes to ensure tokens are available in the UI.
    *
    * @param config the configuration to load from
    */
   public void loadOptionalStateFromConfig(PatternBuilderConfig config) {
-    if (config != null && tokenSelectionPane != null) {
+    if (config != null) {
+      // Store the config to be applied after analysis completes
+      // This ensures detectedTokens is populated before we try to refresh the UI
+      pendingOptionalConfig = config;
+
+      // If analysis already completed, apply immediately
+      if (analysisComplete && tokenSelectionPane != null) {
+        applyPendingOptionalConfig();
+      }
+    }
+  }
+
+  /**
+   * Applies the pending optional configuration to the TokenSelectionPane. This should only be
+   * called after file analysis completes and detectedTokens is populated.
+   */
+  private void applyPendingOptionalConfig() {
+    if (pendingOptionalConfig != null && tokenSelectionPane != null) {
       // Load optional token types - WRITE TO TOKENSELECTIONPANE!
       java.util.Set<TokenType> tokenTypes = tokenSelectionPane.getOptionalTokenTypes();
       tokenTypes.clear();
-      if (config.getOptionalTokenTypes() != null) {
-        for (String typeName : config.getOptionalTokenTypes()) {
+      if (pendingOptionalConfig.getOptionalTokenTypes() != null) {
+        for (String typeName : pendingOptionalConfig.getOptionalTokenTypes()) {
           try {
             TokenType type = TokenType.valueOf(typeName);
             tokenTypes.add(type);
@@ -1484,8 +1543,8 @@ public class SimplePatternBuilder extends VBox {
       // Load optional custom token names
       java.util.Set<String> customTokenNames = tokenSelectionPane.getOptionalCustomTokenNames();
       customTokenNames.clear();
-      if (config.getOptionalCustomTokenNames() != null) {
-        customTokenNames.addAll(config.getOptionalCustomTokenNames());
+      if (pendingOptionalConfig.getOptionalCustomTokenNames() != null) {
+        customTokenNames.addAll(pendingOptionalConfig.getOptionalCustomTokenNames());
       }
 
       // Refresh the UI to show the optional token type flags
@@ -1493,6 +1552,14 @@ public class SimplePatternBuilder extends VBox {
         TokenAnalysis loadedAnalysis = createTokenAnalysisFromTokens(detectedTokens);
         tokenSelectionPane.setTokenAnalysis(loadedAnalysis);
       }
+
+      // Clear pending config after applying
+      pendingOptionalConfig = null;
+
+      ValidationLogger.logUserAction(
+          "Optional config applied",
+          String.format(
+              "Restored %d optional types", tokenSelectionPane.getOptionalTokenTypes().size()));
     }
   }
 

@@ -1304,7 +1304,9 @@ public class AdvancedPatternBuilder extends VBox {
         sampleFilenames.addAll(imageFiles);
         updatePreview();
 
-        ValidationLogger.logFileAnalysis(imageFiles.size(), 0, 0);
+        ValidationLogger.logUserAction(
+            "Advanced builder sample files loaded",
+            String.format("%d files prepared for preview", imageFiles.size()));
       }
 
     } catch (Exception e) {

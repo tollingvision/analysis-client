@@ -72,10 +72,10 @@ public class MainScreen {
   // Current session CSV file path (not persisted in config)
   private String currentCsvFilePath = "";
 
-  private final TextField groupPatternField = new TextField("^.{7}");
-  private final TextField frontPatternField = new TextField(".*front.*");
-  private final TextField rearPatternField = new TextField(".*rear.*");
-  private final TextField overviewPatternField = new TextField(".*scene.*");
+  private final TextField groupPatternField = new TextField();
+  private final TextField frontPatternField = new TextField();
+  private final TextField rearPatternField = new TextField();
+  private final TextField overviewPatternField = new TextField();
 
   // Control fields
   private final ProgressBar progressBar = new ProgressBar(0);
@@ -261,6 +261,7 @@ public class MainScreen {
             createChooseButton(() -> chooseDir()));
 
     // Group pattern
+    groupPatternField.setPromptText("^.{7}");
     HBox groupRow =
         createFormRow(
             messages.getString("config.input.group.pattern"),
@@ -268,6 +269,7 @@ public class MainScreen {
             groupPatternField);
 
     // Front pattern
+    frontPatternField.setPromptText(".*front.*");
     HBox frontRow =
         createFormRow(
             messages.getString("config.input.front.pattern"),
@@ -275,6 +277,7 @@ public class MainScreen {
             frontPatternField);
 
     // Rear pattern
+    rearPatternField.setPromptText(".*rear.*");
     HBox rearRow =
         createFormRow(
             messages.getString("config.input.rear.pattern"),
@@ -282,6 +285,7 @@ public class MainScreen {
             rearPatternField);
 
     // Overview pattern
+    overviewPatternField.setPromptText(".*scene.*");
     HBox overviewRow =
         createFormRow(
             messages.getString("config.input.overview.pattern"),
@@ -635,10 +639,18 @@ public class MainScreen {
     }
 
     // Set current generated patterns from UI (these go to config.json, not preset)
-    config.setGroupPattern(groupPatternField.getText());
-    config.setFrontPattern(frontPatternField.getText());
-    config.setRearPattern(rearPatternField.getText());
-    config.setOverviewPattern(overviewPatternField.getText());
+    // Use null for empty fields instead of empty strings
+    String groupPattern = groupPatternField.getText().trim();
+    config.setGroupPattern(groupPattern.isEmpty() ? null : groupPattern);
+
+    String frontPattern = frontPatternField.getText().trim();
+    config.setFrontPattern(frontPattern.isEmpty() ? null : frontPattern);
+
+    String rearPattern = rearPatternField.getText().trim();
+    config.setRearPattern(rearPattern.isEmpty() ? null : rearPattern);
+
+    String overviewPattern = overviewPatternField.getText().trim();
+    config.setOverviewPattern(overviewPattern.isEmpty() ? null : overviewPattern);
 
     return config;
   }
@@ -1079,10 +1091,32 @@ public class MainScreen {
     insecureCheck.setSelected(config.isInsecureAllowed());
     csvField.setText(config.getCsvDirectory());
     maxParSpin.getValueFactory().setValue(config.getMaxParallel());
-    groupPatternField.setText(config.getGroupPattern());
-    frontPatternField.setText(config.getFrontPattern());
-    rearPatternField.setText(config.getRearPattern());
-    overviewPatternField.setText(config.getOverviewPattern());
+
+    // Only set pattern fields if they have non-empty values, otherwise leave empty
+    // to show placeholder
+    if (config.getGroupPattern() != null && !config.getGroupPattern().trim().isEmpty()) {
+      groupPatternField.setText(config.getGroupPattern());
+    } else {
+      groupPatternField.clear();
+    }
+
+    if (config.getFrontPattern() != null && !config.getFrontPattern().trim().isEmpty()) {
+      frontPatternField.setText(config.getFrontPattern());
+    } else {
+      frontPatternField.clear();
+    }
+
+    if (config.getRearPattern() != null && !config.getRearPattern().trim().isEmpty()) {
+      rearPatternField.setText(config.getRearPattern());
+    } else {
+      rearPatternField.clear();
+    }
+
+    if (config.getOverviewPattern() != null && !config.getOverviewPattern().trim().isEmpty()) {
+      overviewPatternField.setText(config.getOverviewPattern());
+    } else {
+      overviewPatternField.clear();
+    }
 
     // Pattern builder config is loaded on-demand in
     // getCurrentPatternConfiguration()

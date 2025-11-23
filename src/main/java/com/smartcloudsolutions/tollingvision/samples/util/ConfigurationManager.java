@@ -73,10 +73,10 @@ public class ConfigurationManager {
         .setInsecureAllowed(false)
         .setCsvDirectory("")
         .setMaxParallel(4)
-        .setGroupPattern("^.{7}")
-        .setFrontPattern(".*front.*")
-        .setRearPattern(".*rear.*")
-        .setOverviewPattern(".*scene.*")
+        .setGroupPattern("")
+        .setFrontPattern("")
+        .setRearPattern("")
+        .setOverviewPattern("")
         .build();
   }
 

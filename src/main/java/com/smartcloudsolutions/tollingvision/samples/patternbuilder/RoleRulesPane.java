@@ -407,14 +407,20 @@ public class RoleRulesPane extends VBox {
 
   /** Sets the role rules and updates the display. */
   public void setRoleRules(ObservableList<RoleRule> rules) {
-    roleRules.clear();
     rulesContainer.getChildren().clear();
 
     if (rules != null) {
-      roleRules.addAll(rules);
-      for (RoleRule rule : rules) {
+      // Create a copy of the rules to avoid clearing the source list
+      java.util.List<RoleRule> rulesCopy = new java.util.ArrayList<>(rules);
+
+      roleRules.clear();
+      roleRules.addAll(rulesCopy);
+
+      for (RoleRule rule : rulesCopy) {
         addRuleChip(rule);
       }
+    } else {
+      roleRules.clear();
     }
   }
 

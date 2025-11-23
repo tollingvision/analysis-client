@@ -13,10 +13,10 @@ public class UserConfiguration {
   private boolean insecureAllowed = false;
   private String csvDirectory = "";
   private int maxParallel = 4;
-  private String groupPattern = "^.{7}";
-  private String frontPattern = ".*front.*";
-  private String rearPattern = ".*rear.*";
-  private String overviewPattern = ".*scene.*";
+  private String groupPattern = null;
+  private String frontPattern = null;
+  private String rearPattern = null;
+  private String overviewPattern = null;
 
   /** Creates a new UserConfiguration with default values. */
   public UserConfiguration() {}

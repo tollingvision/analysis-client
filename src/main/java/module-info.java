@@ -24,6 +24,9 @@ module analysis.sample {
   requires com.google.protobuf;
   requires com.google.protobuf.util;
 
+  // JSON processing (for protobuf-util serialization)
+  requires com.google.gson;
+
   // Java desktop integration
   requires java.desktop;
 
