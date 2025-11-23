@@ -437,8 +437,7 @@ message Image {
 | **Performance**   | Low UI latency; throughput depends on server and network |
 | **Scalability**   | Handles large image sets; lightweight concurrency with virtual threads |
 | **Memory**        | 512 MB heap default; virtual threads reduce overhead |
-| **Application Size** | ~416KB JAR (minimal dependencies) |
-| **Portability**   | Single-file installer per OS via `jpackage` |
+| **Portability**   | Native installers (~50MB with bundled JRE runtime) for Windows, macOS, and Linux |
 | **Security**      | TLS 1.2+ support, no plaintext credentials |
 | **Usability**     | Gallery keyboard shortcuts, comprehensive tooltips, accessible UI |
 
