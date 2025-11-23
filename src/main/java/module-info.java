@@ -1,7 +1,9 @@
 /**
  * TollingVision Analysis Sample Application Module
  *
- * <p>This module provides a JavaFX-based desktop application for batch processing vehicle images
+ * <p>
+ * This module provides a JavaFX-based desktop application for batch processing
+ * vehicle images
  * through AI analysis using the TollingVision service.
  */
 module analysis.sample {
@@ -35,6 +37,10 @@ module analysis.sample {
 
   // Memory management
   requires java.management;
+
+  // gRPC service providers (required for runtime service loading)
+  uses io.grpc.NameResolverProvider;
+  uses io.grpc.LoadBalancerProvider;
 
   // Exports for JavaFX application
   exports com.smartcloudsolutions.tollingvision.samples;
