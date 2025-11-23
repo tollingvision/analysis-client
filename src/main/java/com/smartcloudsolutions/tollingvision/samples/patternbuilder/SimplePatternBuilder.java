@@ -105,12 +105,11 @@ public class SimplePatternBuilder extends VBox {
     // saved)
     customTokenManager.loadCustomTokens();
 
-    // Auto-analyze files from input folder and start with first visible step
+    // Auto-analyze files from input folder
     if (inputFolder != null && !inputFolder.trim().isEmpty()) {
-      // Start analysis immediately
+      // Start analysis immediately, but DON'T show step 0 yet
+      // The analysis completion will trigger showStep(0) automatically
       startFileAnalysis(inputFolder);
-      // Start with step 0 (Token Selection - previously step 1)
-      showStep(0);
     } else {
       throw new IllegalArgumentException("Input folder must be provided and exist");
     }
@@ -664,6 +663,14 @@ public class SimplePatternBuilder extends VBox {
           // Update sample filenames
           sampleFilenames.clear();
           sampleFilenames.addAll(analysis.getFilenames());
+
+          // If this is first load and UI not shown yet, show step 0 now
+          boolean isFirstLoad =
+              getChildren().size() <= 4; // Only header, validation, extension area, nav
+          if (isFirstLoad && currentStep == 0) {
+            // Analysis complete, now safe to show UI
+            showStep(0);
+          }
 
           // Configure token preview spinner - start with 10 files by default
           int fileCount = sampleFilenames.size();

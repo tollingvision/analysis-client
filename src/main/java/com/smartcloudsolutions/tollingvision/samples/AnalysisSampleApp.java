@@ -56,6 +56,9 @@ public class AnalysisSampleApp extends Application {
    */
   @Override
   public void start(Stage primaryStage) {
+    // Set up file logging for Windows MSI (no console available)
+    setupFileLogging();
+
     // Load resource bundle
     messages = ResourceBundle.getBundle("messages");
 
@@ -166,10 +169,22 @@ public class AnalysisSampleApp extends Application {
           protected Void call() {
             try {
               validate(folder, csvOut, patterns);
-              Map<String, List<Path>> buckets =
-                  bucketize(folder.toPath(), Pattern.compile(patterns[0]));
+              Map<String, List<Path>> buckets = null;
+              try {
+                buckets = bucketize(folder.toPath(), Pattern.compile(patterns[0]));
+              } catch (Exception e) {
+                log(
+                    "ERROR during file grouping: "
+                        + e.getClass().getName()
+                        + ": "
+                        + e.getMessage());
+                e.printStackTrace();
+                return null;
+              }
+
               int total = buckets.size();
               Platform.runLater(() -> mainScreen.groupsDiscoveredProperty().set(total));
+              log(String.format("Discovered %d groups from pattern: %s", total, patterns[0]));
 
               if (total == 0) {
                 log(messages.getString("message.no.buckets"));
@@ -315,7 +330,20 @@ public class AnalysisSampleApp extends Application {
                 }
               }
             } catch (Exception ex) {
-              log("ERROR: " + ex.getMessage());
+              log("ERROR: " + ex.getClass().getName() + ": " + ex.getMessage());
+              ex.printStackTrace(); // Print to stderr for MSI debugging
+              // Also log stack trace to UI for visibility
+              StringBuilder stackTrace = new StringBuilder();
+              stackTrace
+                  .append(ex.getClass().getName())
+                  .append(": ")
+                  .append(ex.getMessage())
+                  .append("\n");
+              for (StackTraceElement element : ex.getStackTrace()) {
+                stackTrace.append("  at ").append(element.toString()).append("\n");
+                if (stackTrace.length() > 500) break; // Limit size
+              }
+              log("Stack trace: " + stackTrace.toString());
             }
             return null;
           }
@@ -535,6 +563,46 @@ public class AnalysisSampleApp extends Application {
                   result.addImageAnalysis(imagePath, pr.getResult());
                 }
               });
+    }
+  }
+
+  /**
+   * Sets up file logging to capture console output when running from Windows MSI installer (where
+   * no console is available). Logs are written to user home directory.
+   */
+  private void setupFileLogging() {
+    try {
+      // Get user home directory for log file
+      String userHome = System.getProperty("user.home");
+      Path logDir = Path.of(userHome, ".tollingvision-client");
+      Files.createDirectories(logDir);
+
+      Path logFile = logDir.resolve("application.log");
+
+      // Set up java.util.logging to write to file
+      java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+      java.util.logging.FileHandler fileHandler =
+          new java.util.logging.FileHandler(
+              logFile.toString(),
+              1024 * 1024, // 1 MB
+              3, // 3 rotating files
+              true // append mode
+              );
+      fileHandler.setFormatter(new java.util.logging.SimpleFormatter());
+      rootLogger.addHandler(fileHandler);
+
+      // Also redirect System.out and System.err to the log file
+      java.io.PrintStream logStream =
+          new java.io.PrintStream(new java.io.FileOutputStream(logFile.toFile(), true), true);
+      System.setOut(logStream);
+      System.setErr(logStream);
+
+      System.out.println("=== Application started at " + java.time.LocalDateTime.now() + " ===");
+      System.out.println("Log file: " + logFile.toString());
+
+    } catch (Exception e) {
+      // If logging setup fails, just print to stderr (may not be visible in MSI)
+      e.printStackTrace();
     }
   }
 
