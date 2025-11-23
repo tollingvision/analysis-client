@@ -129,12 +129,11 @@ analysis-sample/
 │       ├── AnalysisSampleApp.java                         # Main JavaFX application
 │       ├── model/
 │       │   ├── ImageGroupResult.java                      # Result data model
-│       │   ├── UserConfiguration.java                     # User settings model
-│       │   └── ImageRole.java                            # Image role enumeration
+│       │   └── UserConfiguration.java                     # User settings model
 │       ├── ui/
 │       │   ├── MainScreen.java                           # Main application UI
 │       │   └── GalleryWindow.java                        # Interactive gallery viewer
-│       ├── patternbuilder/                               # ⭐ Pattern Builder System
+│       ├── patternbuilder/                               # ⭐ Pattern Builder System (50+ classes)
 │       │   ├── PatternBuilderDialog.java                 # Main pattern builder dialog
 │       │   ├── SimplePatternBuilder.java                 # Visual drag-and-drop builder
 │       │   ├── AdvancedPatternBuilder.java               # Direct regex editor
@@ -143,12 +142,20 @@ analysis-sample/
 │       │   ├── FilenameTokenizer.java                    # Intelligent filename analysis
 │       │   ├── GroupingEngine.java                       # Image grouping logic
 │       │   ├── PresetManager.java                        # Save/load configurations
-│       │   └── ValidationModel.java                      # Pattern validation
+│       │   ├── ValidationModel.java                      # Pattern validation
+│       │   ├── TokenSelectionPane.java                   # Token selection UI
+│       │   ├── RoleRulesPane.java                        # Role rules configuration
+│       │   ├── BackgroundAnalysisService.java            # Async file analysis
+│       │   └── ... (+ 40 more supporting classes)
 │       └── util/
 │           ├── OverlayUtils.java                         # Lightweight overlay rendering
 │           └── ConfigurationManager.java                 # Settings persistence
 ├── src/main/resources/
-│   ├── assets/logo.png                                   # Application logo
+│   ├── assets/
+│   │   ├── logo_16_16.png                               # Application icons (multi-size)
+│   │   ├── logo_32_32.png
+│   │   ├── logo_48_48.png
+│   │   └── logo_128_128.png
 │   ├── messages.properties                               # I18n resource bundle
 │   ├── tollingvision-theme.css                          # Application theme
 │   └── pattern-builder-validation.css                   # Pattern builder styling
