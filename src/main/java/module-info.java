@@ -1,9 +1,7 @@
 /**
  * TollingVision Analysis Sample Application Module
  *
- * <p>
- * This module provides a JavaFX-based desktop application for batch processing
- * vehicle images
+ * <p>This module provides a JavaFX-based desktop application for batch processing vehicle images
  * through AI analysis using the TollingVision service.
  */
 module analysis.sample {
