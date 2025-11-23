@@ -868,8 +868,8 @@ public class MainScreen {
     // Otherwise, construct default path from directory + default filename
     String csvDir = csvField.getText().trim();
     if (csvDir.isEmpty()) {
-      // If no directory set, use current working directory
-      csvDir = System.getProperty("user.dir");
+      // If no directory set, use user's home directory (writable on all platforms)
+      csvDir = System.getProperty("user.home");
     }
 
     Path csvPath = Paths.get(csvDir, getDefaultCsvFileName());
