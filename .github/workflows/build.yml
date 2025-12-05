@@ -44,6 +44,20 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x gradlew
 
+      - name: Verify icon files exist
+        run: |
+          echo "Checking icon files..."
+          ls -lh app-icon.* WixUI_Bmp_Dialog.png 2>/dev/null || echo "WARNING: Some icon files missing"
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            test -f app-icon.ico && echo "✓ Windows icon (app-icon.ico) found" || echo "✗ Windows icon missing"
+            test -f WixUI_Bmp_Dialog.png && echo "✓ WixUI splash (WixUI_Bmp_Dialog.png) found" || echo "✗ WixUI splash missing"
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            test -f app-icon.icns && echo "✓ macOS icon (app-icon.icns) found" || echo "✗ macOS icon missing"
+          else
+            test -f app-icon.png && echo "✓ Linux icon (app-icon.png) found" || echo "✗ Linux icon missing"
+          fi
+        shell: bash
+
       - name: Build project
         run: ./gradlew build --no-daemon
         env:

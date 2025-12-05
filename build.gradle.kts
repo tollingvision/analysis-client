@@ -93,6 +93,31 @@ jlink {
             else          -> "deb"   // Linux
         }
         
+        // Application icon (platform-specific)
+        // The plugin automatically uses the correct icon based on the platform
+        val iconFile = when {
+            os.isMacOsX   -> file("app-icon.icns")
+            os.isWindows  -> file("app-icon.ico")
+            else          -> file("app-icon.png")  // Linux
+        }
+        if (iconFile.exists() && iconFile.length() > 0) {
+            icon = iconFile.absolutePath
+            logger.lifecycle("Using application icon: ${iconFile.absolutePath}")
+        } else {
+            logger.warn("Application icon not found: ${iconFile.name}")
+        }
+        
+        // Windows-specific: Add resource-dir for WixUI splash screen
+        if (os.isWindows) {
+            val wixDialogBmp = file("WixUI_Bmp_Dialog.png")
+            if (wixDialogBmp.exists() && wixDialogBmp.length() > 0) {
+                resourceDir = projectDir
+                logger.lifecycle("Windows installer splash screen: WixUI_Bmp_Dialog.png in ${projectDir.absolutePath}")
+            } else {
+                logger.lifecycle("No custom splash screen (WixUI_Bmp_Dialog.png not found)")
+            }
+        }
+        
         // Common options for all platforms
         val licenseFile = file("LICENSE.txt")
         if (licenseFile.exists()) {
@@ -110,27 +135,6 @@ jlink {
                 // Install to C:\Program Files\TollingVision\AnalysisSample
                 "--install-dir", "TollingVision\\AnalysisSample"
             )
-            
-            // Add application icon if it exists
-            val winIcon = file("app-icon.ico")
-            if (winIcon.exists() && winIcon.length() > 0) {
-                winOptions.add("--icon")
-                winOptions.add(winIcon.absolutePath)
-                logger.lifecycle("Windows application icon: ${winIcon.absolutePath}")
-            } else {
-                logger.warn("Windows icon not found: app-icon.ico")
-            }
-            
-            // Add splash screen if it exists (for MSI installer)
-            // WiX requires specific filename: WixUI_Bmp_Dialog.png (493x312)
-            val wixDialogBmp = file("WixUI_Bmp_Dialog.png")
-            if (wixDialogBmp.exists() && wixDialogBmp.length() > 0) {
-                winOptions.add("--resource-dir")
-                winOptions.add(projectDir.absolutePath)
-                logger.lifecycle("Windows installer splash screen: WixUI_Bmp_Dialog.png")
-            } else {
-                logger.lifecycle("No custom splash screen (create WixUI_Bmp_Dialog.png for custom splash)")
-            }
             
             // Code signing (if certificate is available)
             // To enable: set environment variables or system properties:
@@ -164,13 +168,6 @@ jlink {
                 // Install to /Applications/TollingVision/
                 "--install-dir", "/Applications/TollingVision"
             )
-            
-            // Add application icon if it exists
-            val macIcon = file("app-icon.icns")
-            if (macIcon.exists() && macIcon.length() > 0) {
-                macOptions.add("--icon")
-                macOptions.add(macIcon.absolutePath)
-            }
             
             // Code signing for macOS (if certificate is available)
             // To enable: set environment variables:
@@ -211,13 +208,6 @@ jlink {
                 "--linux-deb-maintainer", "Smart Cloud Solutions <info@smartcloudsolutions.com>",
                 "--linux-rpm-license-type", "Proprietary"
             )
-            
-            // Add application icon if it exists
-            val linuxIcon = file("app-icon.png")
-            if (linuxIcon.exists() && linuxIcon.length() > 0) {
-                linuxOptions.add("--icon")
-                linuxOptions.add(linuxIcon.absolutePath)
-            }
             
             installerOptions.addAll(linuxOptions)
         }
