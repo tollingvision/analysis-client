@@ -116,6 +116,9 @@ jlink {
             if (winIcon.exists() && winIcon.length() > 0) {
                 winOptions.add("--icon")
                 winOptions.add(winIcon.absolutePath)
+                logger.lifecycle("Windows application icon: ${winIcon.absolutePath}")
+            } else {
+                logger.warn("Windows icon not found: app-icon.ico")
             }
             
             // Add splash screen if it exists (for MSI installer)
