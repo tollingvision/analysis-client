@@ -73,6 +73,13 @@ jlink {
         appVersion = "1.0.0"
         skipInstaller = false
         
+        // Vendor/Publisher information (shown in Windows "Programs and Features")
+        installerOptions.addAll(listOf(
+            "--vendor", "Smart Cloud Solutions Inc.",
+            "--copyright", "Copyright © 2025 Smart Cloud Solutions Inc. All rights reserved.",
+            "--description", "Professional AI-powered vehicle image analysis application for batch processing using TollingVision service"
+        ))
+        
         // Ensure Java options are passed correctly
         jvmArgs = listOf(
             "-Djpackage.app-version=1.0.0"
@@ -118,13 +125,35 @@ jlink {
                 winOptions.add(projectDir.absolutePath)
             }
             
+            // Code signing (if certificate is available)
+            // To enable: set environment variables or system properties:
+            //   - WIN_SIGN_CERT_FILE: path to .pfx/.p12 certificate file
+            //   - WIN_SIGN_CERT_PASSWORD: certificate password
+            val certFile = System.getenv("WIN_SIGN_CERT_FILE") ?: System.getProperty("winSignCertFile")
+            val certPass = System.getenv("WIN_SIGN_CERT_PASSWORD") ?: System.getProperty("winSignCertPassword")
+            
+            if (certFile != null && file(certFile).exists()) {
+                winOptions.add("--win-per-user-install")  // Per-user install when signed
+                winOptions.add("--win-upgrade-uuid")
+                winOptions.add("b8c9d5e6-7f8a-4b1c-9d2e-3f4a5b6c7d8e")  // Unique GUID for upgrades
+                
+                // Note: jpackage doesn't directly support signing, use post-processing with signtool
+                // For actual signing, run after jpackage:
+                // signtool sign /f certificate.pfx /p password /t http://timestamp.digicert.com installer.msi
+                logger.lifecycle("Code signing certificate detected: $certFile")
+                logger.lifecycle("Note: Run signtool manually after jpackage for actual signing")
+            } else {
+                logger.lifecycle("Windows installer will be unsigned (no certificate found)")
+                logger.lifecycle("To sign: set WIN_SIGN_CERT_FILE and WIN_SIGN_CERT_PASSWORD environment variables")
+            }
+            
             installerOptions.addAll(winOptions)
         }
         
         // macOS-specific configuration
         if (os.isMacOsX) {
             val macOptions = mutableListOf(
-                "--mac-package-name", "AnalysisSample",
+                "--mac-package-name", "TollingVisionAnalysisSample",
                 // Install to /Applications/TollingVision/
                 "--install-dir", "/Applications/TollingVision"
             )
@@ -136,6 +165,30 @@ jlink {
                 macOptions.add(macIcon.absolutePath)
             }
             
+            // Code signing for macOS (if certificate is available)
+            // To enable: set environment variables:
+            //   - MAC_SIGN_IDENTITY: Developer ID Application certificate name
+            //   Example: "Developer ID Application: Your Name (TEAMID)"
+            val signIdentity = System.getenv("MAC_SIGN_IDENTITY") ?: System.getProperty("macSignIdentity")
+            
+            if (signIdentity != null && signIdentity.isNotEmpty()) {
+                macOptions.add("--mac-sign")
+                macOptions.add("--mac-signing-key-user-name")
+                macOptions.add(signIdentity)
+                
+                // Optional: add entitlements if needed
+                val entitlements = file("macos-entitlements.plist")
+                if (entitlements.exists()) {
+                    macOptions.add("--mac-entitlements")
+                    macOptions.add(entitlements.absolutePath)
+                }
+                
+                logger.lifecycle("macOS code signing enabled with identity: $signIdentity")
+            } else {
+                logger.lifecycle("macOS installer will be unsigned (no signing identity found)")
+                logger.lifecycle("To sign: set MAC_SIGN_IDENTITY environment variable")
+            }
+            
             installerOptions.addAll(macOptions)
         }
         
@@ -145,7 +198,11 @@ jlink {
                 "--linux-shortcut",
                 "--linux-menu-group", "TollingVision",
                 // Install to /opt/tollingvision/analysissample
-                "--install-dir", "/opt/tollingvision/analysissample"
+                "--install-dir", "/opt/tollingvision/analysissample",
+                // Package maintainer information (shown in package managers)
+                "--linux-package-name", "tollingvision-analysis-sample",
+                "--linux-deb-maintainer", "Smart Cloud Solutions <info@smartcloudsolutions.com>",
+                "--linux-rpm-license-type", "Proprietary"
             )
             
             // Add application icon if it exists

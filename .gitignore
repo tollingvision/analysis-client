@@ -160,6 +160,7 @@ secrets/
 
 # Release documentation (keep local only)
 RELEASE_NOTES_*.md
+CODE_SIGNING.md
 .github/RELEASE_TEMPLATE.md
 
 # Installer assets (placeholders only - replace with actual branded assets)
