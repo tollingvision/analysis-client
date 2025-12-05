@@ -108,10 +108,11 @@ jlink {
         }
         
         // Windows-specific: Add resource-dir for WixUI splash screen
+        // Must use installerOptions, not resourceDir property (not supported by plugin)
         if (os.isWindows) {
             val wixDialogBmp = file("WixUI_Bmp_Dialog.png")
             if (wixDialogBmp.exists() && wixDialogBmp.length() > 0) {
-                resourceDir = projectDir
+                installerOptions.addAll(listOf("--resource-dir", projectDir.absolutePath))
                 logger.lifecycle("Windows installer splash screen: WixUI_Bmp_Dialog.png in ${projectDir.absolutePath}")
             } else {
                 logger.lifecycle("No custom splash screen (WixUI_Bmp_Dialog.png not found)")
