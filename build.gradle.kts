@@ -124,7 +124,7 @@ jlink {
         // macOS-specific configuration
         if (os.isMacOsX) {
             val macOptions = mutableListOf(
-                "--mac-package-name", "TollingVisionAnalysisSample",
+                "--mac-package-name", "AnalysisSample",
                 // Install to /Applications/TollingVision/
                 "--install-dir", "/Applications/TollingVision"
             )

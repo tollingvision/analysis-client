@@ -1,10 +1,10 @@
-# TollingVision Analysis Client
+# TollingVision Analysis Sample
 
 A powerful desktop application for batch processing vehicle images using [TollingVision](https://tollingvision.com)'s AI-powered license plate and vehicle recognition. Built with modern Java technologies for efficient, high-volume image analysis.
 
 ## Overview
 
-TollingVision Analysis Client processes batches of vehicle images by automatically grouping them (front, rear, overview shots) and sending them to a TollingVision server via gRPC. The application features real-time progress tracking, interactive result galleries, and an intuitive visual pattern builder that simplifies filename configuration.
+TollingVision Analysis Sample processes batches of vehicle images by automatically grouping them (front, rear, overview shots) and sending them to a TollingVision server via gRPC. The application features real-time progress tracking, interactive result galleries, and an intuitive visual pattern builder that simplifies filename configuration.
 
 ## Key Features
 
