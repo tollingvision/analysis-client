@@ -58,9 +58,9 @@ jlink {
         uses("io.grpc.LoadBalancerProvider")
     }
 
-    imageName.set("AnalysisSample")
+    imageName.set("TollingVision Analysis Sample")
     launcher {
-        name = "AnalysisSample"
+        name = "TollingVision Analysis Sample"
         jvmArgs = listOf(
             "-Djpackage.app-version=1.0.0"
         )
@@ -68,8 +68,8 @@ jlink {
     options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
 
     jpackage {
-        imageName = "AnalysisSample"
-        installerName = "AnalysisSample"
+        imageName = "TollingVision Analysis Sample"
+        installerName = "TollingVisionAnalysisSample"
         appVersion = "1.0.0"
         skipInstaller = false
         
@@ -104,9 +104,16 @@ jlink {
                 "--install-dir", "TollingVision\\AnalysisSample"
             )
             
-            // Add splash screen if it exists
+            // Add application icon if it exists
+            val winIcon = file("app-icon.ico")
+            if (winIcon.exists() && winIcon.length() > 0) {
+                winOptions.add("--icon")
+                winOptions.add(winIcon.absolutePath)
+            }
+            
+            // Add splash screen if it exists (for MSI installer)
             val splashFile = file("installer-splash.png")
-            if (splashFile.exists()) {
+            if (splashFile.exists() && splashFile.length() > 0) {
                 winOptions.add("--resource-dir")
                 winOptions.add(projectDir.absolutePath)
             }
@@ -117,10 +124,17 @@ jlink {
         // macOS-specific configuration
         if (os.isMacOsX) {
             val macOptions = mutableListOf(
-                "--mac-package-name", "AnalysisSample",
+                "--mac-package-name", "TollingVisionAnalysisSample",
                 // Install to /Applications/TollingVision/
                 "--install-dir", "/Applications/TollingVision"
             )
+            
+            // Add application icon if it exists
+            val macIcon = file("app-icon.icns")
+            if (macIcon.exists() && macIcon.length() > 0) {
+                macOptions.add("--icon")
+                macOptions.add(macIcon.absolutePath)
+            }
             
             installerOptions.addAll(macOptions)
         }
@@ -133,6 +147,13 @@ jlink {
                 // Install to /opt/tollingvision/analysissample
                 "--install-dir", "/opt/tollingvision/analysissample"
             )
+            
+            // Add application icon if it exists
+            val linuxIcon = file("app-icon.png")
+            if (linuxIcon.exists() && linuxIcon.length() > 0) {
+                linuxOptions.add("--icon")
+                linuxOptions.add(linuxIcon.absolutePath)
+            }
             
             installerOptions.addAll(linuxOptions)
         }
