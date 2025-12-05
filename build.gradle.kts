@@ -119,10 +119,14 @@ jlink {
             }
             
             // Add splash screen if it exists (for MSI installer)
-            val splashFile = file("installer-splash.png")
-            if (splashFile.exists() && splashFile.length() > 0) {
+            // WiX requires specific filename: WixUI_Bmp_Dialog.png (493x312)
+            val wixDialogBmp = file("WixUI_Bmp_Dialog.png")
+            if (wixDialogBmp.exists() && wixDialogBmp.length() > 0) {
                 winOptions.add("--resource-dir")
                 winOptions.add(projectDir.absolutePath)
+                logger.lifecycle("Windows installer splash screen: WixUI_Bmp_Dialog.png")
+            } else {
+                logger.lifecycle("No custom splash screen (create WixUI_Bmp_Dialog.png for custom splash)")
             }
             
             // Code signing (if certificate is available)
