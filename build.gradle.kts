@@ -52,6 +52,9 @@ javafx {
 
 jlink {
     forceMerge(".*")
+    // TLS connections to the production service require EC cipher support.
+    // Gradle run uses the full JDK, but the jlink image must include this provider explicitly.
+    options.addAll("--add-modules", "jdk.crypto.ec")
     mergedModule { 
         additive = true
         uses("io.grpc.NameResolverProvider")
