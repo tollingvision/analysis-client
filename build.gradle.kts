@@ -62,7 +62,7 @@ jlink {
     launcher {
         name = "TollingVision Analysis Sample"
         jvmArgs = listOf(
-            "-Djpackage.app-version=1.0.0"
+            "-Djpackage.app-version=1.0.1"
         )
     }
     options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
@@ -70,7 +70,7 @@ jlink {
     jpackage {
         imageName = "TollingVision Analysis Sample"
         installerName = "TollingVisionAnalysisSample"
-        appVersion = "1.0.0"
+        appVersion = "1.0.1"
         skipInstaller = false
         
         // Vendor/Publisher information (shown in Windows "Programs and Features")
@@ -82,7 +82,7 @@ jlink {
         
         // Ensure Java options are passed correctly
         jvmArgs = listOf(
-            "-Djpackage.app-version=1.0.0"
+            "-Djpackage.app-version=1.0.1"
         )
 
         // platform-specific installer format
